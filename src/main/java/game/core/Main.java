@@ -20,12 +20,19 @@ public class Main extends Application {
         Runnable[] showSelect = new Runnable[1];
 
 
+
+
         //
         showSelect[0] = () -> {
             StartScreen startScreen = new StartScreen(playerName -> {
                 CharacterSelectScreen selectScreen = new CharacterSelectScreen(playerName, chosenPlayer -> {
                     state.init(chosenPlayer);
                     GameView gameView = new GameView(state, showSelect[0], stage);
+                    state.setOnAttack(coords ->
+                            javafx.application.Platform.runLater(() ->
+                                    gameView.triggerSwipe(coords[0], coords[1], coords[2], coords[3], coords[4] == 1)
+                            )
+                    );
                     sceneHolder[0].setRoot(gameView.getRoot());
                     gameView.getCanvas().setOnKeyPressed(gameView::handleKeyPress);
                     gameView.getCanvas().requestFocus();

@@ -122,6 +122,17 @@ public class GameView {
         // Fonts are recreated on render based on tile size
         new AnimationTimer() {
             @Override public void handle(long now) {
+                if (lastNanoTime == 0) lastNanoTime = now;
+                double deltaSec = (now - lastNanoTime) / 1_000_000_000.0;
+                lastNanoTime = now;
+
+                if (!swipes.isEmpty()) {
+                    // Each swipe lasts ~0.25 seconds
+                    swipes.forEach(s -> s.progress += deltaSec / 0.25);
+                    swipes.removeIf(s -> s.progress >= 1.0);
+                    needsRedraw = true;
+                }
+
                 if (needsRedraw) { render(); needsRedraw = false; }
             }
         }.start();
@@ -346,6 +357,34 @@ public class GameView {
             gc.fillText(player.getSymbol(), px, py);
 
         }
+        //Draw swipe animation
+        // Draw swipe animations
+        for (SwipeAnim s : swipes) {
+            int col = s.tileX - startX, row = s.tileY - startY;
+            if (col < 0 || row < 0 || col >= vpCols || row >= vpRows) continue;
+
+            double px = col * tileSize, py = offsetY + row * tileSize;
+            double cx = px + tileSize / 2.0, cy = py + tileSize / 2.0;
+
+            // Eased fade: fast in, slow out
+            double alpha = 1.0 - (s.progress * s.progress);
+            double radius = tileSize * 0.35 * (0.5 + s.progress * 0.5);
+
+            // Arc sweep: slash from ~225° sweeping 90°
+            double startAngle =  -s.angleDeg - 45;
+            double arcLength  = 90 + s.progress * 30;
+
+            gc.save();
+            gc.setGlobalAlpha(alpha);
+            gc.setStroke(s.isPlayer ? Color.web("#5be0ff") : Color.web("#ff5b5b"));
+            gc.setLineWidth(tileSize * 0.12);
+            gc.setLineCap(javafx.scene.shape.StrokeLineCap.ROUND);
+            gc.strokeArc(cx - radius, cy - radius, radius * 2, radius * 2,
+                    startAngle, arcLength,
+                    javafx.scene.shape.ArcType.OPEN);
+            gc.restore();
+        }
+
     }
 
     private void renderMessage(GraphicsContext gc, Font msgFont) {
@@ -397,4 +436,26 @@ public class GameView {
         gc.setFont(Font.font("Monospaced", FontWeight.NORMAL, 13));
         gc.fillText("Press R to restart", getWinWidth() / 2.0, getWinHeight() / 2.0 + 50);
     }
+
+    //swipe animation
+    private final java.util.List<SwipeAnim> swipes = new java.util.ArrayList<>();
+    private long lastNanoTime = 0;
+
+    private static class SwipeAnim {
+        int tileX, tileY;       // map tile the attack happened at
+        double progress;        // 0.0 → 1.0
+        boolean isPlayer;       // true = player attack color, false = enemy attack color
+        double angleDeg;
+        SwipeAnim(int tileX, int tileY, boolean isPlayer, int fromX, int fromY) {  // ← add fromX, fromY
+            this.tileX = tileX; this.tileY = tileY;
+            this.progress = 0.0; this.isPlayer = isPlayer;
+            this.angleDeg = Math.toDegrees(Math.atan2(tileY - fromY, tileX - fromX));  // ← add this
+        }
+    }
+    public void triggerSwipe(int fromX, int fromY, int toX, int toY, boolean isPlayer) {
+        swipes.add(new SwipeAnim(toX, toY, isPlayer, fromX, fromY));
+        needsRedraw = true;
+    }
+
+
 }

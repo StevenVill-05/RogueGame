@@ -21,6 +21,12 @@ public class GameState {
     private int floor;
     private boolean gameOver;
     private final List<String> messages = new ArrayList<>();
+    private java.util.function.Consumer<int[]> onAttack; // [tileX, tileY, isPlayer(1/0)]
+
+    //swipe animation on attack
+    public void setOnAttack(java.util.function.Consumer<int[]> callback) {
+        this.onAttack = callback;
+    }
 
     //map vision variables
     private boolean[][] visible;
@@ -149,8 +155,11 @@ public class GameState {
 
         Enemy target = getEnemyAt(nx, ny);
         if (target != null) {
+
             int dmg = player.getAttack();
             target.takeDamage(dmg);
+            if (onAttack != null) onAttack.accept(new int[]{player.getX(), player.getY(), target.getX(), target.getY(), 1}); //swipes
+
             if (target.isDead()) {
                 enemies.remove(target);
                 player.addKill();
@@ -199,9 +208,11 @@ public class GameState {
             int ex = e.getX() + mx, ey = e.getY() + my;
 
             if (dist<=e.getRange()) {
-                if(e.atk(e.getAcc())){
+
+                if(e.atk(e.getAcc(),random)){
                     int dmg = e.getAttack();
                     player.takeDamage(dmg);
+                    if (onAttack != null) onAttack.accept(new int[]{e.getX(), e.getY(), player.getX(), player.getY(), 0});//swipes
                     addMessage(e.getName() + " hits you for " + dmg + "! (" + player.getHp() + " HP left)");
                 }
 

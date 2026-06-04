@@ -30,11 +30,12 @@ public class Enemy implements HostileActions {
 
     //action
     public void takeDamage(int dmg) { hp = Math.max(0, hp - dmg); }
+    /*
     public boolean atk (int acc){
         Random random = new Random();
         int x = random.nextInt(100)+1;
         return x<=acc;
-    }
+    }*/
 
     //getters
     public int getX()       { return x; }
