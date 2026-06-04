@@ -1,6 +1,7 @@
 package game.ui;
 
 import game.core.GameState;
+import game.core.ScoreManager;
 import game.entity.characters.Player;
 import game.entity.hostile.Enemy;
 import game.entity.item.Item;
@@ -20,8 +21,10 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
-
 import java.util.List;
+import javafx.scene.image.Image;
+
+
 
 public class GameView {
 
@@ -30,6 +33,9 @@ public class GameView {
     public static final int MAP_ROWS  = 22;
     public static final int HUD_HEIGHT = 60;
     public static final int MSG_HEIGHT = 36;
+
+    private final Image wallSprite;
+    private final Image floorSprite;
 
 
     public static final int HUD_HEIGHT_RATIO = 60; // base HUD height
@@ -41,10 +47,6 @@ public class GameView {
 
     // Palette
     private static final Color BG          = Color.web("#0d0b12");
-    private static final Color WALL        = Color.web("#2a2240");
-    private static final Color WALL_EDGE   = Color.web("#3a3058");
-    private static final Color FLOOR       = Color.web("#1e1a2e");
-    private static final Color FLOOR_DARK  = Color.web("#17132a");
     private static final Color STAIR_COL   = Color.web("#e2b96a");
     private static final Color PLAYER_COL  = Color.web("#5ba4e0");
     private static final Color GOLD_COL    = Color.web("#f0c040");
@@ -59,7 +61,7 @@ public class GameView {
     private static final Color TEXT_GOLD   = Color.web("#f0c040");
     private static final Color TEXT_RED    = Color.web("#e05b5b");
     private static final Color TEXT_CYAN   = Color.web("#5be0d0");
-    private static final Color FOG_SEEN    = Color.web("#0d0b12", 0.55);
+    private static final Color FOG_SEEN    = Color.web("#0d0b12", 0.30);
 
 
     private final Stage stage;
@@ -89,7 +91,11 @@ public class GameView {
     public GameView(GameState state, Runnable onRestart, Stage stage) {
         //loads font
         Font.loadFont(getClass().getResourceAsStream("/fonts/Jacquard12-Regular.ttf"), 16);
-        //
+        //load sprites
+        wallSprite  = new Image(getClass().getResourceAsStream("/sprites/wall.png"));
+        floorSprite  = new Image(getClass().getResourceAsStream("/sprites/floor.png"));
+
+
         this.state = state;
         this.onRestart = onRestart;
         this.stage = stage;
@@ -178,7 +184,9 @@ public class GameView {
         renderMap(gc, tile, dynTileFont);
         renderMessage(gc, dynMsgFont);
 
-        if (state.isGameOver()) renderGameOver(gc);
+        if (state.isGameOver()) {
+            renderGameOver(gc);
+        }
     }
 
 
@@ -258,23 +266,15 @@ public class GameView {
                 Tile tile = map.getTile(mx, my);
 
                 // Draw tile background
+                // AFTER:
                 if (tile == Tile.WALL) {
-                    gc.setFill(visible ? WALL : WALL.darker());
-                    gc.fillRect(px, py, tileSize, tileSize);
-                    if (visible) {
-                        gc.setFill(WALL_EDGE);
-                        gc.fillRect(px, py, tileSize, 2);
-                        gc.fillRect(px, py, 2, tileSize);
-                    }
+                    gc.setGlobalAlpha(visible ? 1.0 : 0.4);
+                    gc.drawImage(wallSprite, px, py, tileSize, tileSize);
+                    gc.setGlobalAlpha(1.0);
                 } else {
-                    gc.setFill(visible ? FLOOR : FLOOR_DARK);
-                    gc.fillRect(px, py, tileSize, tileSize);
-                    // subtle grid line
-                    if (visible) {
-                        gc.setFill(Color.web("#ffffff", 0.025));
-                        gc.fillRect(px, py, tileSize, 1);
-                        gc.fillRect(px, py, 1, tileSize);
-                    }
+                    gc.setGlobalAlpha(visible ? 1.0 : 0.4);
+                    gc.drawImage(floorSprite, px, py, tileSize, tileSize);
+                    gc.setGlobalAlpha(1.0);
                     if (tile == Tile.STAIR && visible) {
                         gc.setFont(tileFont);
                         gc.setFill(STAIR_COL);
@@ -389,6 +389,9 @@ public class GameView {
             "Floor " + state.getFloor() + "  |  " + p.getKills() + " kills  |  " + p.getGold() + " gold",
             getWinWidth() / 2.0, getWinHeight() / 2.0 + 16
         );
+
+
+        ScoreManager.saveIfHighScore(p.getName(),state.getFloor(),p.getKills(),p.getGold());
 
         gc.setFill(TEXT_DIM);
         gc.setFont(Font.font("Monospaced", FontWeight.NORMAL, 13));

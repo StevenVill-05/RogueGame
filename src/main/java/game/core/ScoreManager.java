@@ -8,11 +8,11 @@ public class ScoreManager {
 
     private static final String FILE = "highscores.json";
 
-    public static void saveIfHighScore(int floor, int kills, int gold) {
+    public static void saveIfHighScore(String name, int floor, int kills, int gold) {
         List<String> scores = load();
 
         // Format: "floor,kills,gold"
-        scores.add(floor + "," + kills + "," + gold);
+        scores.add(name+","+floor + "," + kills + "," + gold);
 
         // Sort by kills descending, keep top 10
         scores.sort((a, b) -> {

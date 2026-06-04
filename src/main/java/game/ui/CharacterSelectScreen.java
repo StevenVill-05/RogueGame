@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 
 public class CharacterSelectScreen extends VBox {
 
-    public CharacterSelectScreen(Consumer<Player> onSelect) {
+    public CharacterSelectScreen(String playerName,Consumer<Player> onSelect) {
         setAlignment(Pos.CENTER);
         setSpacing(20);
         setBackground(new Background(new BackgroundFill(Color.web("#0d0b12"), null, null)));
@@ -24,9 +24,12 @@ public class CharacterSelectScreen extends VBox {
         cards.setAlignment(Pos.CENTER);
 
         cards.getChildren().addAll(
-                makeCard("⚔  Warrior",  "HP: 20  ATK: 4\nTank — slow but sturdy",  () -> onSelect.accept(new Warrior(0,0))),
-                makeCard("🗡  Rogue",    "HP: 12  ATK: 6\nGlass cannon — fast striker", () -> onSelect.accept(new Rogue(0,0))),
-                makeCard("🔮  Mage",     "HP: 8   ATK: 8\nFragile but devastating",  () -> onSelect.accept(new Mage(0,0)))
+                makeCard("⚔  Warrior", "HP: 20  ATK: 4\nTank — slow but sturdy",
+                        () -> { Player p = new Warrior(0, 0); p.setName(playerName); onSelect.accept(p); }),
+                makeCard("🗡  Rogue",   "HP: 12  ATK: 6\nGlass cannon — fast striker",
+                        () -> { Player p = new Rogue(0, 0);   p.setName(playerName); onSelect.accept(p); }),
+                makeCard("🔮  Mage",    "HP: 8   ATK: 8\nFragile but devastating",
+                        () -> { Player p = new Mage(0, 0);    p.setName(playerName); onSelect.accept(p); })
         );
 
         getChildren().addAll(title, cards);

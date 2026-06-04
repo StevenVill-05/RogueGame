@@ -43,7 +43,7 @@ public class Player {
 
     //setter
     protected void setSymbol(String s) { this.symbol = s; }
-    protected void setName(String n)   { this.name = n; }
+    public void setName(String n)   { this.name = n; }
     public void setX(int x) { this.x = x; }
     public void setY(int y) { this.y = y; }
 }

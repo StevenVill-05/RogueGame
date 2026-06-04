@@ -2,11 +2,12 @@ package game.core;
 
 import game.ui.CharacterSelectScreen;
 import game.ui.GameView;
+import game.ui.StartScreen;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-
 public class Main extends Application {
+
 
     public static void main(String[] args) {
         launch(args);
@@ -21,19 +22,22 @@ public class Main extends Application {
 
         //
         showSelect[0] = () -> {
-            CharacterSelectScreen selectScreen = new CharacterSelectScreen(chosenPlayer -> {
-                state.init(chosenPlayer);
-                GameView gameView = new GameView(state, showSelect[0], stage);
-                sceneHolder[0].setRoot(gameView.getRoot());
-                gameView.getCanvas().setOnKeyPressed(gameView::handleKeyPress);
-                gameView.getCanvas().requestFocus();
+            StartScreen startScreen = new StartScreen(playerName -> {
+                CharacterSelectScreen selectScreen = new CharacterSelectScreen(playerName, chosenPlayer -> {
+                    state.init(chosenPlayer);
+                    GameView gameView = new GameView(state, showSelect[0], stage);
+                    sceneHolder[0].setRoot(gameView.getRoot());
+                    gameView.getCanvas().setOnKeyPressed(gameView::handleKeyPress);
+                    gameView.getCanvas().requestFocus();
+                });
+                sceneHolder[0].setRoot(selectScreen);
             });
             if (sceneHolder[0] == null) {
                 // First launch
-                sceneHolder[0] = new Scene(selectScreen, GameView.BASE_WIDTH, GameView.BASE_HEIGHT);
+                sceneHolder[0] = new Scene(startScreen, GameView.BASE_WIDTH, GameView.BASE_HEIGHT);
             } else {
                 // Returns to game
-                sceneHolder[0].setRoot(selectScreen);
+                sceneHolder[0].setRoot(startScreen);
             }
         };
 
