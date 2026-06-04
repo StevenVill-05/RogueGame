@@ -27,6 +27,8 @@ import javafx.scene.image.Image;
 
 
 public class GameView {
+    private boolean scoreSaved = false;
+
 
     public static final int TILE      = 28;
     public static final int MAP_COLS  = 30;
@@ -428,10 +430,15 @@ public class GameView {
             "Floor " + state.getFloor() + "  |  " + p.getKills() + " kills  |  " + p.getGold() + " gold",
             getWinWidth() / 2.0, getWinHeight() / 2.0 + 16
         );
-
-
-        ScoreManager.saveIfHighScore(p.getName(),state.getFloor(),p.getKills(),p.getGold());
-
+        if (!scoreSaved) {
+            ScoreManager.saveIfHighScore(
+                    p.getName(),
+                    state.getFloor(),
+                    p.getKills(),
+                    p.getGold()
+            );
+            scoreSaved = true;
+        }
         gc.setFill(TEXT_DIM);
         gc.setFont(Font.font("Monospaced", FontWeight.NORMAL, 13));
         gc.fillText("Press R to restart", getWinWidth() / 2.0, getWinHeight() / 2.0 + 50);
