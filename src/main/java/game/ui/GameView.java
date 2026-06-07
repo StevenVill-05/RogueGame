@@ -148,6 +148,7 @@ public class GameView {
      */
     public GameView(GameState state, Runnable onRestart, Stage stage) {
         Font.loadFont(getClass().getResourceAsStream("/fonts/Jacquard12-Regular.ttf"), 16);
+        Font.loadFont(getClass().getResourceAsStream("/fonts/alagard.ttf"), 16);
 
         // Load the two shared tile sprites (walls and floor)
         wallSprite  = new Image(getClass().getResourceAsStream("/sprites/wall.png"));
@@ -280,7 +281,7 @@ public class GameView {
         Font dynTileFont = Font.font("Jacquard 12", FontWeight.BOLD,   tile - 6);
         Font dynHudFont  = Font.font("Monospaced",  FontWeight.BOLD,   hudFontSize);
         Font dynHudSmall = Font.font("Monospaced",  FontWeight.NORMAL, hudSmallSize);
-        Font dynMsgFont  = Font.font("Jacquard 12", FontWeight.NORMAL, msgFontSize);
+        Font dynMsgFont  = Font.font("alagard", FontWeight.NORMAL, msgFontSize);
 
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.setFill(BG);
